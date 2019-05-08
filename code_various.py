@@ -1,3 +1,11 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Sun May  5 07:03:45 2019
+
+@author: bruno_dbki
+"""
+
      # -*- coding: utf-8 -*-
 """
 Spyder Editor
@@ -9,42 +17,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sklearn as lrn
-from sklearn.linear_model import LinearRegression
+from sklearn import linear_model 
+from sklearn import svm
 from sklearn.metrics import r2_score
+
+classifiers = [
+    svm.SVR(),
+    linear_model.SGDRegressor(),
+    linear_model.BayesianRidge(),
+    linear_model.LassoLars(),
+    #linear_model.ARDRegression(),
+    linear_model.PassiveAggressiveRegressor(),
+    linear_model.TheilSenRegressor(),
+    linear_model.LinearRegression()]
+
+
 
 
 
 train = pd.read_csv("train.csv", index_col=0)
 test = pd.read_csv("test.csv", index_col=0)
-# FIRST THING TO DO IS CONCATENATE GRADES
-
-
-#train["NU_NOTA_MT"] = train["NU_NOTA_MT"]*3
-
-#train["NU_NOTA_CN"] = train["NU_NOTA_CN"]*2
-
-#train["NU_NOTA_LC"] = train["NU_NOTA_LC"]*1.5
-
-#train["NU_NOTA_CH"] = train["NU_NOTA_CH"]*1
-
-#train["NU_NOTA_REDACAO"] = train["NU_NOTA_REDACAO"]*3
-
-
-#NU_NOTA_MT IS THE ANSWER
-
-#sns.distplot(test["NU_NOTA_CN"].dropna())
-#sns.distplot(test["NU_NOTA_LC"].dropna())
-#sns.distplot(test["NU_NOTA_CH"].dropna())
-#sns.distplot(test["NU_NOTA_REDACAO"].dropna())
-#plt.figure()
-#sns.distplot(train["NU_NOTA_CN"].dropna())
-#sns.distplot(train["NU_NOTA_LC"].dropna())
-#a = sns.distplot(train["NU_NOTA_CH"].dropna())
-#sns.distplot(train["NU_NOTA_REDACAO"].dropna())
-#
-#train = train.fillna(0)
-#test = test.fillna(0)
-#X = train.drop("NU_NOTA_MT", axis = 1)
 X = train
 
 
@@ -100,23 +92,28 @@ for i in range(len(intsec)):
 
 
 #%%
+        
+#a = lm.fit(X_train, X_select.NU_NOTA_MT)
 
-##REGRESSAO LINEAR
-#
-lm = LinearRegression()
-#
-a = lm.fit(X_train, X_select.NU_NOTA_MT)
-#
-res = lm.predict(X_test)
+#res = lm.predict(X_test)
+
+
+##REGRESSoes
+res = list()        
+try:
+    for item in classifiers:
+        print(item)
+        clf = item
+        clf.fit(X_train, X_select.NU_NOTA_MT)
+        res.append(clf.predict(X_test))
+except:
+    print(item)
+    
 
 #ll = list([test.index[0],res])
 
+
+
+
+
 r = res
-
-r[r<320]=0
-
-out = test.copy()[[]]
-
-out["NU_NOTA_MT"] = r
-
-out.to_csv("answer.csv")
