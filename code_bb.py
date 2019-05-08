@@ -76,7 +76,8 @@ X_test = scaler.transform(X_test)
 
 #%%
 
-lm = MLPRegressor(alpha=0.1)
+#lm = MLPRegressor(alpha=0.1)#93.55
+lm = MLPRegressor(alpha=0.01)#93.6
 #
 a = lm.fit(X_train, X_select.NU_NOTA_MT)
 #
@@ -87,7 +88,7 @@ res = lm.predict(X_test)
 r = res
 
 r[r<320]=0
-
+#%%
 out = test.copy()[[]]
 
 out["NU_NOTA_MT"] = r
