@@ -11,66 +11,30 @@ import seaborn as sns
 import sklearn as lrn
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn import svm
 
 
 
 train = pd.read_csv("train.csv", index_col=0)
 test = pd.read_csv("test.csv", index_col=0)
-# FIRST THING TO DO IS CONCATENATE GRADES
+
+X = train.copy()
 
 
-#train["NU_NOTA_MT"] = train["NU_NOTA_MT"]*3
 
-#train["NU_NOTA_CN"] = train["NU_NOTA_CN"]*2
-
-#train["NU_NOTA_LC"] = train["NU_NOTA_LC"]*1.5
-
-#train["NU_NOTA_CH"] = train["NU_NOTA_CH"]*1
-
-#train["NU_NOTA_REDACAO"] = train["NU_NOTA_REDACAO"]*3
-
-
-#NU_NOTA_MT IS THE ANSWER
-
-#sns.distplot(test["NU_NOTA_CN"].dropna())
-#sns.distplot(test["NU_NOTA_LC"].dropna())
-#sns.distplot(test["NU_NOTA_CH"].dropna())
-#sns.distplot(test["NU_NOTA_REDACAO"].dropna())
-#plt.figure()
-#sns.distplot(train["NU_NOTA_CN"].dropna())
-#sns.distplot(train["NU_NOTA_LC"].dropna())
-#a = sns.distplot(train["NU_NOTA_CH"].dropna())
-#sns.distplot(train["NU_NOTA_REDACAO"].dropna())
-#
-#train = train.fillna(0)
-#test = test.fillna(0)
-#X = train.drop("NU_NOTA_MT", axis = 1)
-X = train
-
-
-##LISTA DE INDICES FILTRADOS NA TABELA TEST
-h = list(test.head(0))
-#X = train[h]
-
-#TROCAR STRING POR NUMEROS EM TODAS AS COLUNAS
-#TRAIN
-X = X.apply(lambda col: pd.factorize(col)[0])
-
-#TEST
-#test_ins = test.NU_INSCRICAO
-#test_X = test.apply(lambda col: pd.factorize(col)[0])
 
 
 #MATRZ DE CORRELAÇÕES DE TREINO
 corr = X.corr()
 
 #LINHA DE CORRELAÇÕES PARA NU_NOTAS_MT
+
 mt_corr = corr.NU_NOTA_MT
 m_corr = np.mean(abs(mt_corr.mean()))
 #%%
 l = list()
 for i in range(len(mt_corr)):
-    if abs(mt_corr[i]) > m_corr:#0.0568:
+    if abs(mt_corr[i]) > 0.0168:
         l.append(mt_corr.index[i])
 
              
@@ -104,8 +68,8 @@ for i in range(len(intsec)):
 ##REGRESSAO LINEAR
 #
         
-from sklearn.preprocessing import StandardScaler  
-scaler = StandardScaler()  
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()  
 # Don't cheat - fit only on training data
 scaler.fit(X_train)  
 X_train = scaler.transform(X_train)  
@@ -116,8 +80,11 @@ X_test = scaler.transform(X_test)
 
 ##REGRESSAO LINEAR
 #
-lm = LinearRegression()
-#
+#lm = LinearRegression()
+#gamma = 0.15 -> 93,37%
+#lm = svm.SVR(kernel='rbf', C=50, gamma='scale', epsilon=.01, verbose = True, max_iter = 5000) #93.45%
+
+lm = svm.SVR(kernel='rbf', C=100, gamma='scale', epsilon=.001, verbose = True, max_iter = 1000) 
 a = lm.fit(X_train, X_select.NU_NOTA_MT)
 #
 res = lm.predict(X_test)

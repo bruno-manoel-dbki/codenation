@@ -67,6 +67,18 @@ for i in range(len(intsec)):
 
 #X_train = X_select.drop("NU_NOTA_MT", axis = 1)        
 
+#%%
+
+##REGRESSAO LINEAR
+#
+        
+from sklearn.preprocessing import StandardScaler  
+scaler = StandardScaler()  
+# Don't cheat - fit only on training data
+scaler.fit(X_train)  
+X_train = scaler.transform(X_train)  
+# apply same transformation to test data
+X_test = scaler.transform(X_test)          
 
 
 #%%

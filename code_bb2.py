@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import sklearn as lrn
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import r2_score
 
@@ -16,35 +15,12 @@ from sklearn.metrics import r2_score
 
 train = pd.read_csv("train.csv", index_col=0)
 test = pd.read_csv("test.csv", index_col=0)
-X = train.copy()
+X_train = train.copy()
+X_test = test.copy()
 
 
-#X = X.apply(lambda col: pd.factorize(col)[0])
 
 #%%
-corr = X.corr()
-
-mt_corr = corr.NU_NOTA_MT
-m_corr = mt_corr.mean()
-l = list()
-for i in range(len(mt_corr)):
-    if abs(mt_corr[i]) > m_corr:
-        l.append(mt_corr.index[i])
-
-             
-
-#%%        
-X_select = train[l]
-X_select = X_select.fillna(0)
-
-
-intsec = list(X_select.columns.intersection(test.columns))
-X_train = X_select[intsec]
-
-
-X_test = test[intsec]   
-X_test = X_test.fillna(0)
-
 i=0
 for i in range(len(X_train.columns)):
     if (X_train.dtypes[i] == 'object'):
@@ -55,8 +31,31 @@ for i in range(len(X_test.columns)):
         X_test[X_test.columns[i]],b = pd.factorize(X_test[X_test.columns[i]])
 
 
+X_train = X_train.fillna(0)
 
-#X_train = X_select.drop("NU_NOTA_MT", axis = 1)        
+X_test = X_test.fillna(0)
+
+
+intsec = list(X_train.columns.intersection(X_test.columns))
+
+X_select = X_train[intsec]
+
+X_test = X_test[intsec]  
+
+
+ 
+#%%
+from sklearn.preprocessing import StandardScaler  
+scaler = StandardScaler()  
+# Don't cheat - fit only on training data
+scaler.fit(X_select)  
+X_select = scaler.transform(X_select)  
+# apply same transformation to test data
+X_test = scaler.transform(X_test)          
+             
+
+#%%        
+        
 
 
 
@@ -65,13 +64,6 @@ for i in range(len(X_test.columns)):
 ##REGRESSAO LINEAR
 #
         
-from sklearn.preprocessing import StandardScaler  
-scaler = StandardScaler()  
-# Don't cheat - fit only on training data
-scaler.fit(X_train)  
-X_train = scaler.transform(X_train)  
-# apply same transformation to test data
-X_test = scaler.transform(X_test)          
 
 #%%
 
@@ -80,8 +72,8 @@ X_test = scaler.transform(X_test)
 #lm = MLPRegressor(alpha=0.05)
 
 lm = MLPRegressor(
-    hidden_layer_sizes= (80,50,10,5,), 
-    #hidden_layer_sizes= (93,79,22),
+    hidden_layer_sizes= (50,20,10,), 
+    #hidden_layer_sizes= (26,15,10),
     #activation="relu", 
     #solver="adam", 
     alpha=0.01, 
@@ -89,8 +81,8 @@ lm = MLPRegressor(
     max_iter = 200,
     learning_rate="constant", 
     tol = 1e-6,
-    #learning_rate_init=0.05, 
-    #power_t=0.9, 
+    #learning_rate_init=0.01, 
+    #power_t=0.5, 
     #beta_1 = 0.009,
     #beta_2 = 0.99,
     #momentum=0.9, 
@@ -99,7 +91,7 @@ lm = MLPRegressor(
     early_stopping=True
     ) 
 
-a = lm.fit(X_train, X_select.NU_NOTA_MT)
+a = lm.fit(X_select, X_train.NU_NOTA_MT)
 #
 res = lm.predict(X_test)
 

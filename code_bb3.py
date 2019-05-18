@@ -9,68 +9,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sklearn as lrn
-from sklearn.linear_model import LinearRegression
+from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import r2_score
 
 
 
 train = pd.read_csv("train.csv", index_col=0)
 test = pd.read_csv("test.csv", index_col=0)
-# FIRST THING TO DO IS CONCATENATE GRADES
+X = train.copy()
 
 
-#train["NU_NOTA_MT"] = train["NU_NOTA_MT"]*3
+#X = X.apply(lambda col: pd.factorize(col)[0])
 
-#train["NU_NOTA_CN"] = train["NU_NOTA_CN"]*2
-
-#train["NU_NOTA_LC"] = train["NU_NOTA_LC"]*1.5
-
-#train["NU_NOTA_CH"] = train["NU_NOTA_CH"]*1
-
-#train["NU_NOTA_REDACAO"] = train["NU_NOTA_REDACAO"]*3
-
-
-#NU_NOTA_MT IS THE ANSWER
-
-#sns.distplot(test["NU_NOTA_CN"].dropna())
-#sns.distplot(test["NU_NOTA_LC"].dropna())
-#sns.distplot(test["NU_NOTA_CH"].dropna())
-#sns.distplot(test["NU_NOTA_REDACAO"].dropna())
-#plt.figure()
-#sns.distplot(train["NU_NOTA_CN"].dropna())
-#sns.distplot(train["NU_NOTA_LC"].dropna())
-#a = sns.distplot(train["NU_NOTA_CH"].dropna())
-#sns.distplot(train["NU_NOTA_REDACAO"].dropna())
-#
-#train = train.fillna(0)
-#test = test.fillna(0)
-#X = train.drop("NU_NOTA_MT", axis = 1)
-X = train
-
-
-##LISTA DE INDICES FILTRADOS NA TABELA TEST
-h = list(test.head(0))
-#X = train[h]
-
-#TROCAR STRING POR NUMEROS EM TODAS AS COLUNAS
-#TRAIN
-X = X.apply(lambda col: pd.factorize(col)[0])
-
-#TEST
-#test_ins = test.NU_INSCRICAO
-#test_X = test.apply(lambda col: pd.factorize(col)[0])
-
-
-#MATRZ DE CORRELAÇÕES DE TREINO
+#%%
 corr = X.corr()
 
-#LINHA DE CORRELAÇÕES PARA NU_NOTAS_MT
 mt_corr = corr.NU_NOTA_MT
-m_corr = np.mean(abs(mt_corr.mean()))
-#%%
+m_corr = mt_corr.mean()
 l = list()
 for i in range(len(mt_corr)):
-    if abs(mt_corr[i]) > m_corr:#0.0568:
+    if abs(mt_corr[i]) > m_corr:
         l.append(mt_corr.index[i])
 
              
@@ -90,7 +48,7 @@ X_test = X_test.fillna(-1)
 
 i=0
 for i in range(len(intsec)):
-    if (X_train.dtypes[i] != 'float64'):
+    if (X_train.dtypes[i] == 'object'):
         X_train[X_train.columns[i]],b = pd.factorize(X_train[X_train.columns[i]])
         X_test[X_test.columns[i]],b = pd.factorize(X_test[X_test.columns[i]])
 
@@ -114,10 +72,30 @@ X_test = scaler.transform(X_test)
 
 #%%
 
-##REGRESSAO LINEAR
-#
-lm = LinearRegression()
-#
+#lm = MLPRegressor(alpha=0.1)#93.55
+#lm = MLPRegressor(alpha=0.01)#93.6
+#lm = MLPRegressor(alpha=0.05)
+
+lm = MLPRegressor(
+    hidden_layer_sizes= (100,50,15 ), 
+    #hidden_layer_sizes= (93,79,22),
+    #activation="relu", 
+    #solver="adam", 
+    alpha=0.01, 
+    #batch_size= 50, 
+    max_iter = 200,
+    learning_rate="constant", 
+    tol = 1e-6,
+    #learning_rate_init=0.05, 
+    #power_t=0.9, 
+    #beta_1 = 0.009,
+    #beta_2 = 0.99,
+    #momentum=0.9, 
+    #epsilon=1e-8,
+    verbose=1, 
+    early_stopping=True
+    ) 
+
 a = lm.fit(X_train, X_select.NU_NOTA_MT)
 #
 res = lm.predict(X_test)
@@ -127,9 +105,9 @@ res = lm.predict(X_test)
 r = res
 
 r[r<320]=0
-
+#%%
 out = test.copy()[[]]
 
 out["NU_NOTA_MT"] = r
-
+    
 out.to_csv("answer.csv")

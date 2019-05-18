@@ -22,14 +22,17 @@ from sklearn import svm
 from sklearn.metrics import r2_score
 
 classifiers = [
-    svm.SVR(),
-    linear_model.SGDRegressor(),
-    linear_model.BayesianRidge(),
-    linear_model.LassoLars(),
+    #svm.SVR(kernel='poly', C=100, gamma='auto', degree=3, epsilon=.1,coef0=1),
+
+    svm.SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1, verbose = True, max_iter = 200)
+    #linear_model.SGDRegressor(),
+    #linear_model.BayesianRidge(),
+    #linear_model.LassoLars(),
     #linear_model.ARDRegression(),
-    linear_model.PassiveAggressiveRegressor(),
-    linear_model.TheilSenRegressor(),
-    linear_model.LinearRegression()]
+    #linear_model.PassiveAggressiveRegressor(),
+    #linear_model.TheilSenRegressor(),
+    #linear_model.LinearRegression()
+    ]
 
 
 
@@ -46,7 +49,7 @@ h = list(test.head(0))
 
 #TROCAR STRING POR NUMEROS EM TODAS AS COLUNAS
 #TRAIN
-X = X.apply(lambda col: pd.factorize(col)[0])
+X["NU_INSCRICAO"] =pd.factorize(X.NU_INSCRICAO)[0]
 
 #TEST
 #test_ins = test.NU_INSCRICAO
